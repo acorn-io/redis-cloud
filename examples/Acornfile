@@ -1,4 +1,4 @@
-services: db: image: "ghcr.io/lucj/acorn-redis-cloud:v#.#.#"
+services: db: image: "ghcr.io/lucj/acorn-redis-cloud:v#.#.#-#"
 
 containers: app: {
   build: {
