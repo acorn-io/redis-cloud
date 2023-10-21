@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eo pipefail
 
-echo "-> will process to resources creation"
+echo "-> [create.sh][$ACORN_EVENT]"
 
 # Current limitation in plan selection
 PLAN_TYPE="fixed"
@@ -41,8 +41,6 @@ check_redis() {
   echo "-> checking redis using ping"
   redis-cli -u redis://default:${DB_PASS}@${DB_HOST}:${DB_PORT} ping 2>/dev/null
 }
-
-echo "-> will process to resources creation"
 
 # Get list of available plans
 echo "-> about to get list of available plans"

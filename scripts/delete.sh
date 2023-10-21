@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eo pipefail
 
-echo "-> will process to resources deletion"
+echo "-> [delete.sh][$ACORN_EVENT]"
 
 # Helper functions
 
