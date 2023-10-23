@@ -34,4 +34,62 @@ acorn secrets create \
 
 ## Usage
 
-Example to be added soon
+The [examples folder](https://github.com/acorn-io/redis/tree/main/examples) contains a sample application using this Service. This app consists in a Python backend based on the FastAPI library, it displays a web page indicating the number of times the application was called, a counter is saved in the underlying Redis database and incremented with each request. The screenshot below shows the UI of the example application. 
+
+![UI](./images/ui.png)
+
+To use the Redis Service, we first define a *service* property in the Acornfile of the application:
+
+```
+services: db: {
+  image: "ghcr.io/acorn-io/redis:v#.#.#-#"
+}
+```
+
+Next we define the application container:
+
+```
+containers: app: {
+	build: {
+		context: "."
+		target:  "dev"
+	}
+	consumes: ["db"]
+	ports: publish: "8000/http"
+	env: {
+		REDIS_HOST: "@{service.db.address}"
+		REDIS_PASS: "@{service.db.secrets.admin.token}"
+	}
+}
+```
+
+This container is built using the Dockerfile in the examples folder. Once built, the container consumes the Redis service using the address and admin password provided through dedicated variables:
+- @{service.db.address}
+- @{service.db.secrets.admin.token}
+
+This example can be run with the following command (to be run from the *examples* folder)
+
+```
+acorn run -n app
+```
+
+After a few tens of seconds an http endpoint will be returned. Using this endpoint we can access the application and see the counter incremented on each reload of the page.
+
+
+## Deploy the app to your Acorn Sandbox
+
+Instead of managing your own Acorn installation, you can deploy this application in the Acorn Sandbox, the free SaaS offering provided by Acorn. Access to the sandbox requires only a GitHub account, which is used for authentication.
+
+To deploy the example app in your own sandbox, you can:
+
+- use a the application link
+
+- flash the app QR Code
+
+Note: both link and QRCode will be generated and provided soon
+
+Each method will trigger the launch of the app (you will be required to authenticate using your GitHub account).
+
+## Upgrading your Sandbox
+
+An application running in the Sandbox will automatically shut down after 2 hours, but you can use the Acorn Pro plan to remove the time limit and gain additional functionalities.
