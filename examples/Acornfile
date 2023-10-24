@@ -1,4 +1,4 @@
-services: db: external: "redis06"
+services: db: image: "ghcr.io/acorn-io/redis-cloud:v#.#-#"
 
 containers: app: {
   build: {
