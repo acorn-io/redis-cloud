@@ -89,7 +89,7 @@ localData: info: """
 	## Usage
 
 	services: db: {
-		external: "ghcr.io/lucj/acorn-redis-cloud:v#.#.#"
+		external: "ghcr.io/acorn-io/redis-cloud:v#.#-#"
 	}
 
 	containers: app: {
