@@ -91,9 +91,9 @@ To remove the application, run the following command:
 acorn rm -af app
 ```
 
-## Deploy the app to your Acorn Sandbox
+## Deploy the example app to your Acorn Sandbox
 
-Instead of managing your own Acorn installation, you can deploy this application in the Acorn Sandbox, the free SaaS offering provided by Acorn. Access to the sandbox requires only a GitHub account, which is used for authentication.
+Instead of managing your own Acorn installation, you can deploy the example application application in the Acorn Sandbox, the free SaaS offering provided by Acorn. Access to the sandbox requires only a GitHub account, which is used for authentication.
 
 [![Run in Acorn](https://acorn.io/v1-ui/run/badge?image=ghcr.io+acorn-io+redis-cloud+examples:v%23.%23-%23)](https://acorn.io/run/ghcr.io/acorn-io/redis-cloud/examples:v%23.%23-%23)
 
