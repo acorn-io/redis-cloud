@@ -99,7 +99,7 @@ if [[ "${subscriptionId}" != "" ]]; then
     planType=$type
   else
     echo "-> provided subscription id [${subscriptionId}] is invalid"
-    exit 0
+    exit 1
   fi
   echo "-> subscription [${subscriptionId}] of type [${planType}] provided"
 else
