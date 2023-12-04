@@ -88,10 +88,10 @@ PLAN_NAME="Standard 30MB"
 planType=${PLAN_TYPE}
 subscriptionId=${SUBSCRIPTION_ID}
 
-# Keep track of the subscription id is created alongside the database
+# Keep track of the subscription created alongside the database
 internalSubscription=""
 
-# Retrieve subscription if id provided or create a new one
+# Retrieve subscription if provided or create a new one
 if [[ "${subscriptionId}" != "" ]]; then
   # Get the subscription's type
   type=$(get_subscription_type ${subscriptionId})
