@@ -1,6 +1,3 @@
---- WIP ---  
-Not fully functional yet
-
 ## Redis database
 
 Redis is an in-memory data store, used as a database, cache, and message broker. It supports various data structures such as strings, hashes, lists, sets, and more, offering high performance and wide-ranging versatility. More information on [https://redis.io](https://redis.io/).
@@ -36,13 +33,25 @@ acorn secrets create \
 
 The [examples folder](https://github.com/acorn-io/redis/tree/main/examples) contains a sample application using this Service. This app consists in a Python backend based on the FastAPI library, it displays a web page indicating the number of times the application was called, a counter is saved in the underlying Redis database and incremented with each request. The screenshot below shows the UI of the example application. 
 
-![UI](./images/ui.png)
+![UI](./examples/images/ui.png)
 
 To use the Redis Service, we first define a *service* property in the Acornfile of the application:
 
 ```
 services: db: {
   image: "ghcr.io/acorn-io/redis:v#.#.#-#"
+}
+```
+
+By default this service creates a *fixed* type subscription based on the *Standard 30MB* plan.  
+If you already have a subscription and want the database to be created into that one you can define the service as follows:
+
+```
+services: db: {
+  image: "ghcr.io/acorn-io/redis:v#.#.#-#"
+  serviceArgs: {
+    subscriptionId: "YOUR_SUBSCRIPTION_ID"
+  }
 }
 ```
 
@@ -76,9 +85,15 @@ acorn run -n app
 After a few tens of seconds an http endpoint will be returned. Using this endpoint we can access the application and see the counter incremented on each reload of the page.
 
 
-## Deploy the app to your Acorn Sandbox
+To remove the application, run the following command:
 
-Instead of managing your own Acorn installation, you can deploy this application in the Acorn Sandbox, the free SaaS offering provided by Acorn. Access to the sandbox requires only a GitHub account, which is used for authentication.
+```
+acorn rm -af app
+```
+
+## Deploy the example app to your Acorn Sandbox
+
+Instead of managing your own Acorn installation, you can deploy the example application application in the Acorn Sandbox, the free SaaS offering provided by Acorn. Access to the sandbox requires only a GitHub account, which is used for authentication.
 
 [![Run in Acorn](https://acorn.io/v1-ui/run/badge?image=ghcr.io+acorn-io+redis-cloud+examples:v%23.%23-%23)](https://acorn.io/run/ghcr.io/acorn-io/redis-cloud/examples:v%23.%23-%23)
 

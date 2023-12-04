@@ -1,9 +1,17 @@
 #!/bin/sh
-set -eo pipefail
+# set -eo pipefail
 
-echo "-> [delete.sh][$ACORN_EVENT]"
+echo "-> [delete.sh]"
 
-# Helper functions
+# Make sure this script only repply on an Acorn deletion event
+if [ "${ACORN_EVENT}" != "delete" ]; then
+   echo "ACORN_EVENT must be [delete], currently is [${ACORN_EVENT}]"
+   exit 0
+fi
+
+########################
+### Helper functions ###
+########################
 
 get_task() {
   taskId="$1"
@@ -33,6 +41,10 @@ check_task() {
   return 0
 }
 
+########################
+###  Deletion logic  ###
+########################
+
 # create task to delete database
 echo "-> about to delete database [$DATABASE_ID]"
 task=$(curl -sX DELETE \
@@ -49,18 +61,22 @@ while ! check_task "$taskId"; do
 done
 echo "-> database deleted"
 
-# Create task to delete subscription
-echo "-> about to delete subscription [$SUBSCRIPTION_ID]"
-task=$(curl -sX DELETE \
-  -H "x-api-key: ${ACCOUNT_KEY}" \
-  -H "x-api-secret-key: ${SECRET_KEY}" \
-  ${API_URL}/fixed/subscriptions/${SUBSCRIPTION_ID})
-taskId=$(echo $task | jq -r .taskId)
-echo "-> associated task is [$taskId]"
+# Delete subscription is identifier is provided
+if [ "${SUBSCRIPTION_ID}" != "" ]; then 
+  echo "-> about to delete subscription [$SUBSCRIPTION_ID]"
+  task=$(curl -sX DELETE \
+    -H "x-api-key: ${ACCOUNT_KEY}" \
+    -H "x-api-secret-key: ${SECRET_KEY}" \
+    ${API_URL}/fixed/subscriptions/${SUBSCRIPTION_ID})
+  taskId=$(echo $task | jq -r .taskId)
+  echo "-> associated task is [$taskId]"
 
-# Wait for task to complete
-while ! check_task "$taskId"; do
-  echo "-> waiting for subscription to be deleted"
-  sleep 2
-done
-echo "-> subscription deleted"
+  # Wait for task to complete
+  while ! check_task "$taskId"; do
+    echo "-> waiting for subscription to be deleted"
+    sleep 2
+  done
+  echo "-> subscription deleted"
+else
+  echo "-> no subscription to delete"
+fi

@@ -5,84 +5,109 @@ info:        localData.info
 icon:        "./icon.png"
 
 args: {
-  // Name of the database to create
-  dbName: "mydb"
+	// Name of the database to create
+	dbName: "mydb"
 
-  // Cloud provider the cluster will be created in
-  provider: "AWS"
+	// Cloud provider the cluster will be created in
+	provider: "AWS"
 
-  // Region within the cloud provider
-  region: "us-east-1"
+	// Region within the cloud provider
+	region: "us-east-1"
 
-  // Plan related args (only the following are currently accepted)
-  planType: "fixed"
-  planName: "Standard 30MB"
+	// Plan related args (only the following are currently accepted)
+	planType: "fixed"
+	planName: "Standard 30MB"
 
-  // Admin's password
-  adminPassword: ""
+	// Id of an existing subscription (if any)
+	subscriptionId: ""
+
+	// Admin's password
+	adminPassword: ""
+
+	// Do not launch the credential helper, use external credentials
+	useExternalCreds: true
+}
+
+if !args.useExternalCreds {
+	acorns: "cred-helper": {
+		image: "ghcr.io/acorn-io/secret-create-helper:v0.#.#-#"
+		deployArgs: {
+			secretKeys:   "account_key,secret_key"
+			instructions: localData.credInfo
+		}
+	}
 }
 
 services: redis: generated: job: "create-resources"
 
 jobs: "create-resources": {
-  build: context: "."
-  env: {
-    API_URL: "https://api.redislabs.com/v1"
-    ACCOUNT_KEY: "secret://redis-cloud-creds/account_key"
-    SECRET_KEY: "secret://redis-cloud-creds/secret_key"
-    DB_PASS: std.ifelse(args.adminPassword != "", args.adminPassword, "secret://admin/token")
-    DB_NAME: args.dbName
-    PROVIDER: args.provider
-    REGION: args.region
-  }
-  events: ["create"]
+	build: context: "."
+	env: {
+		API_URL:         "https://api.redislabs.com/v1"
+		ACCOUNT_KEY:     "secret://redis-cloud-creds/account_key"
+		SECRET_KEY:      "secret://redis-cloud-creds/secret_key"
+		DB_PASS:         std.ifelse(args.adminPassword != "", args.adminPassword, "secret://admin/token")
+		DB_NAME:         args.dbName
+		PROVIDER:        args.provider
+		REGION:          args.region
+		SUBSCRIPTION_ID: args.subscriptionId
+	}
+	events: ["create"]
 }
 
 jobs: "delete-resources": {
-  build: {
-    context: "."
-    buildArgs: {
-        action: "delete"
-    }
-  }
-  env: {
-    API_URL: "https://api.redislabs.com/v1"
-    ACCOUNT_KEY: "secret://redis-cloud-creds/account_key"
-    SECRET_KEY: "secret://redis-cloud-creds/secret_key"
-    SUBSCRIPTION_ID: "secret://resources/subscription_id"
-    DATABASE_ID: "secret://resources/database_id"
-  }
-  events: ["delete"]
+	build: {
+		context: "."
+		buildArgs: {
+			action: "delete"
+		}
+	}
+	env: {
+		API_URL:         "https://api.redislabs.com/v1"
+		ACCOUNT_KEY:     "secret://redis-cloud-creds/account_key"
+		SECRET_KEY:      "secret://redis-cloud-creds/secret_key"
+		SUBSCRIPTION_ID: "secret://resources/subscription_id"
+		DATABASE_ID:     "secret://resources/database_id"
+	}
+	events: ["delete"]
 }
 
 secrets: {
-  "admin": {
-    name: "password to be used for the admin user"
-    type: "token"
-    params: {
-        length: 16
-        characters: "abcdedfhifj01234567890"
-    }
-    data: token: ""
-  }
+	"admin": {
+		name: "password to be used for the admin user"
+		type: "token"
+		params: {
+			length:     16
+			characters: "abcdedfhifj01234567890"
+		}
+		data: token: ""
+	}
 }
 
 secrets: {
-  "resources": {
-    type: "generated"
-    params: job: "create-resources"
-  }
+	"resources": {
+		type: "generated"
+		params: job: "create-resources"
+	}
 }
 
-secrets: {
-  "redis-cloud-creds": {
-      external: "redis-cloud-creds"
-      type: "opaque"
-      data: {
-          account_key: "REDIS_CLOUD_ACCOUNT_KEY"
-          secret_key: "REDIS_CLOUD_SECRET_KEY"
-      }
-  }
+if args.useExternalCreds {
+	secrets: {
+		"redis-cloud-creds": {
+			external: "redis-cloud-creds"
+			type:     "opaque"
+			data: {
+				account_key: "REDIS_CLOUD_ACCOUNT_KEY"
+				secret_key:  "REDIS_CLOUD_SECRET_KEY"
+			}
+		}
+	}
+} else {
+	secrets: {
+		"redis-cloud-creds": {
+			alias: "cred-helper.output"
+		}
+	}
 }
 
 localData: info: """
@@ -102,3 +127,11 @@ localData: info: """
 	}
 	"""
 
+localData: credInfo: """
+    ## Redis Labs Setup Instructions
+       	
+    To use this service, you need to supply Redis Cloud credentials. 
+    We will need the *account key* and the *secret key*
+        
+    You will need to <a href="https://redis.com" target="_blank">create a Redis Cloud account</a> to obtain these values. 
+    """
